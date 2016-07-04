@@ -1,7 +1,7 @@
 @servers(['web' => 'jimmyrolando.xyz'])
 
 @setup
-    $repo = 'git@github.com:jimmyrolando/prueba4.git';
+    $repo = 'git@github.com:jimmyrolando/laravel-vuejs.git';
 	$release_dir = '/home/deployer/default/releases';
 	$app_dir = '/home/deployer/default/current';
 	$store_dir = '/home/deployer/default/storage';

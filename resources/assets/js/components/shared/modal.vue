@@ -1,5 +1,5 @@
 <template>
-	<div class="modal-mask" v-show="show" transition="modal" >
+	<div class="modal-mask" transition="modal"  >
 	<div class="modal-wrapper">
 		<div class="modal-container">
 			<div class="modal-header">
@@ -11,7 +11,6 @@
 				</slot>
 			</div>
 			<div class="modal-footer">
-				<button v-if="cancel" class="btn btn-danger" @click="show = false">Cancelar</button>
 				<slot name="footer">
 				</slot>
 			</div>
@@ -21,18 +20,7 @@
 </template>
 <script>
 	export default {
-		props: {
-			show: {
-			  type: Boolean,
-			  required: true,
-			  twoWay: true,
-			  default: false    
-			},
-			cancel: {
-				type: Boolean,
-				default: true
-			}
-		}
+
 	}
 </script>
 
@@ -66,12 +54,10 @@
 
 	@media( min-width: 768px) { 
 		.modal-container {
-	  		width: 55%;
+	  		width: 50%;
 	  		min-width: 430px;
-	  		min-height: 200px
 		}
 	}
-
 
 
 	.modal-container {
@@ -83,14 +69,12 @@
 	  transition: all .3s ease;
 	  font-family: Helvetica, Arial, sans-serif;
 	  position: relative;
+	  overflow-y: auto;
+	  max-height: 100vh;
 	}
 
 	.modal-header h3 {
 	  margin: 0;
-	}
-
-	.modal-body {
-	  /*margin: 20px 0;*/
 	}
 
 	.modal-header, .modal-footer {

@@ -12506,16 +12506,27 @@ exports.default = {
 		var ecb = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
 		_vue2.default.http.post('avatar', formData).then(function (resp) {
-			return cb(resp.data.avatar);
+			return cb(resp.data);
+		}, function (resp) {
+			return ecb(resp.data);
 		});
 	},
-	uploadProfile: function uploadProfile(formData, id, cb) {
+	updateProfile: function updateProfile(formData, id, cb) {
 		var ecb = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
 
 		_vue2.default.http.post('profiles/' + id, formData).then(function (resp) {
 			return cb(resp.data.user);
 		}, function (resp) {
-			return ecb(resp);
+			return ecb(resp.data);
+		});
+	},
+	updateUser: function updateUser(formData, id, cb) {
+		var ecb = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
+		_vue2.default.http.post('users/' + id, formData).then(function (resp) {
+			return cb(resp.data);
+		}, function (resp) {
+			return ecb(resp.data);
 		});
 	},
 	logout: function logout(cb) {
@@ -12528,18 +12539,13 @@ exports.default = {
 			return cb(resp.data);
 		});
 	},
-	updateUser: function updateUser(formData, id, cb) {
-		var ecb = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
-
-		_vue2.default.http.post('users/' + id, formData).then(function (resp) {
-			return cb(resp.data);
-		});
-	},
 	createUser: function createUser(formData, cb) {
 		var ecb = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
 
 		_vue2.default.http.post('users', formData).then(function (resp) {
 			return cb(resp.data.user);
+		}, function (resp) {
+			return ecb(resp.data);
 		});
 	}
 };
@@ -12550,7 +12556,7 @@ var __vueify_style__ = __vueify_insert__.insert("\n\t.avatar-admin {\n        wi
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
 
 var _createUser = require('./shared/create-user.vue');
@@ -12561,52 +12567,57 @@ var _updateUser = require('./shared/update-user.vue');
 
 var _updateUser2 = _interopRequireDefault(_updateUser);
 
+var _deleteUser = require('./shared/delete-user.vue');
+
+var _deleteUser2 = _interopRequireDefault(_deleteUser);
+
 var _actions = require('../vuex/actions');
+
+var _getters = require('../vuex/getters');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
-	components: {
-		CreateUser: _createUser2.default, UpdateUser: _updateUser2.default
-	},
-	data: function data() {
-		return {
-			currentModal: '',
-			editedUser: null
-		};
-	},
+  components: { CreateUser: _createUser2.default, UpdateUser: _updateUser2.default, DeleteUser: _deleteUser2.default },
+  data: function data() {
+    return {
+      currentModal: '',
+      editedUser: null
+    };
+  },
 
-	vuex: {
-		getters: {
-			users: function users(state) {
-				return state.users;
-			}
-		},
-		actions: {
-			getAllUsers: _actions.getAllUsers,
-			deleteUser: _actions.deleteUser
-		}
-	},
-	created: function created() {
-		this.getAllUsers();
-	},
+  vuex: {
+    getters: {
+      users: _getters.users
+    },
+    actions: {
+      getAllUsers: _actions.getAllUsers, showForm: _actions.showForm
+    }
+  },
+  created: function created() {
+    this.getAllUsers();
+  },
 
-	methods: {
-		deleteUser: function deleteUser(user) {
-			this.deleteUser(user);
-		},
-		editUser: function editUser(user) {
-			this.editedUser = user;
-			this.currentModal = 'update-user';
-		},
-		createUser: function createUser() {
-			this.editedUser = {};
-			this.currentModal = 'create-user';
-		}
-	}
+  methods: {
+    deleteUser: function deleteUser(user) {
+      this.editedUser = user;
+      this.currentModal = 'delete-user';
+      this.showForm(true);
+    },
+    editUser: function editUser(user) {
+      this.editedUser = user;
+      this.currentModal = 'update-user';
+      this.showForm(true);
+    },
+    createUser: function createUser() {
+      this.editedUser = {};
+      this.currentModal = 'create-user';
+      this.showForm(true);
+    }
+  }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t<div class=\"container\">\n\t\t<div class=\"row\">\n\t\t \t<div class=\"col-md-10 col-md-offset-1 clearfix\">\n\t\t\t\t<button @click=\"createUser()\" class=\"btn btn-success pull-right\" style=\"margin-bottom:10px;\">Nuevo Usuario</button>\n\t\t\t</div>\n\t\t</div>\n        <div class=\"row\">\n            <div class=\"col-md-10 col-md-offset-1\">\n\n                <div class=\"panel panel-default\">\n                    <div class=\"panel-body\">\n                        <div class=\"media\" v-for=\"user in users\">\n                        \t<div class=\"controls\">\n                        \t\t<i @click=\"editUser(user)\" class=\"fa fa-2x fa-pencil tm-edit\"></i>\n                        \t\t<i @click=\"deleteUser(user)\" class=\"fa fa-2x fa-trash tm-delete\"></i>\n                        \t</div>\n\t\t\t\t\t\t\t<div class=\"media-left media-middle \">\n\n\t\t\t\t\t\t\t\t<a href=\"#\" @click.prevent=\"editUser(user)\">\n\t\t\t\t\t\t\t\t\t<img class=\"media-object avatar-admin\" :src=\"user.avatar\" alt=\"{{ user.name }}\">\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class=\"media-body\">\n\t\t\t\t\t\t\t<p class=\"\"></p>\n\t\t\t\t\t\t\t\t<h5 class=\"media-heading\"><strong>{{ user.name.toUpperCase() }}</strong> <span> ({{ user.role }})</span></h5>\n\t\t\t\t\t\t\t\t<h4>{{ user.full_name }}</h4>\n\t\t\t\t\t\t\t\t<h5>{{ user.birth_date }}</h5>\n\t\t\t\t\t\t\t\t<h5>{{ user.address }}</h5>\n\t\t\t\t\t\t\t\t<h5>{{ user.zip_code }}</h5>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n    <component :is=\"currentModal\" :model=\"editedUser\" :show.sync=\"currentModal\"></component>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t<div class=\"container\">\n\n\t\t<div class=\"row\">\n\t\t \t<div class=\"col-md-8 col-md-offset-2 clearfix\">\n\t\t\t\t<button @click=\"createUser()\" class=\"btn btn-success pull-right\" style=\"margin-bottom:10px;\">Create New User</button>\n\t\t\t</div>\n\t\t</div>\n\n        <div class=\"row\">\n            <div class=\"col-md-8 col-md-offset-2\">\n                <div class=\"panel panel-default\">\n                    <div class=\"panel-body\">\n                        <div class=\"media\" v-for=\"user in users\">\n\n                        \t<div class=\"controls\">\n                        \t\t<i @click=\"editUser(user)\" class=\"fa fa-2x fa-pencil tm-edit\"></i>\n                        \t\t<i @click=\"deleteUser(user)\" class=\"fa fa-2x fa-trash tm-delete\"></i>\n                        \t</div>\n\n\t\t\t\t\t\t\t<div class=\"media-left media-middle \">\n\t\t\t\t\t\t\t\t<a href=\"#\" @click.prevent=\"editUser(user)\">\n\t\t\t\t\t\t\t\t\t<img class=\"media-object avatar-admin\" :src=\"user.avatar\" alt=\"{{ user.name }}\">\n\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t</div>\n\n\t\t\t\t\t\t\t<div class=\"media-body\">\n\t\t\t\t\t\t\t\t<h4 class=\"media-heading text-capitalize\"><strong>{{ user.name }}</strong> <span> ({{ user.role }})</span></h4>\n\t\t\t\t\t\t\t\t<h5>{{ user.full_name }}</h5>\n\t\t\t\t\t\t\t\t<h5>{{ user.birth_date }}</h5>\n\t\t\t\t\t\t\t\t<h5>{{ user.address }}</h5>\n\t\t\t\t\t\t\t\t<h5>{{ user.zip_code }}</h5>\n\t\t\t\t\t\t\t</div>\n\n\t\t\t\t\t\t</div>\n                    </div>\n                </div>\n            </div>\n        </div>\n\n    </div>\n\n    <component :is=\"currentModal\" :model=\"editedUser\"></component>\n\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -12621,7 +12632,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-65ca6acd", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../vuex/actions":17,"./shared/create-user.vue":10,"./shared/update-user.vue":15,"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],9:[function(require,module,exports){
+},{"../vuex/actions":18,"../vuex/getters":19,"./shared/create-user.vue":10,"./shared/delete-user.vue":11,"./shared/update-user.vue":16,"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],9:[function(require,module,exports){
 var __vueify_insert__ = require("vueify/lib/insert-css")
 var __vueify_style__ = __vueify_insert__.insert("   \n.avatar {\n    width:180px; \n    height:180px; \n    border-radius:50%; \n    margin-right:25px; \n    float: left;\n}\n.avatar:hover{\n    cursor: pointer;\n}\n\n#map {\n    height: 300px;\n}\n.edit {\n    cursor: pointer;\n    font-size: .7em;\n    color: lightgray;\n}\n.edit:hover {\n    color: gray;\n}\n\n")
 'use strict';
@@ -12638,6 +12649,10 @@ var _updateProfile = require('./shared/update-profile.vue');
 
 var _updateProfile2 = _interopRequireDefault(_updateProfile);
 
+var _actions = require('../vuex/actions');
+
+var _getters = require('../vuex/getters');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
@@ -12647,6 +12662,7 @@ exports.default = {
     data: function data() {
         return {
             currentModal: '',
+            editedUser: null,
             map: null,
             geocoder: null,
             marker: null
@@ -12654,19 +12670,27 @@ exports.default = {
     },
 
     vuex: {
-        getters: {
-            currentUser: function currentUser(state) {
-                return state.currentUser;
-            }
-        }
+        getters: { currentUser: _getters.currentUser },
+        actions: { getAllUsers: _actions.getAllUsers, showForm: _actions.showForm }
     },
     ready: function ready() {
         if (!this.currentUser.full_name == '') {
             this.currentModal = 'create-profile';
+            this.showForm(true);
         }
     },
 
     methods: {
+        editUser: function editUser() {
+            this.editedUser = this.currentUser;
+            this.currentModal = 'update-profile';
+            this.showForm(true);
+        },
+        editAvatar: function editAvatar() {
+            this.editedUser = this.currentUser;
+            this.currentModal = 'update-avatar';
+            this.showForm(true);
+        },
         geocodeAddress: function geocodeAddress() {
             var geocoder = this.geocoder;
             var map = this.map;
@@ -12702,7 +12726,7 @@ exports.default = {
     }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"container\">\n    <div class=\"row\">\n        <div class=\"col-md-8 col-md-offset-2\">\n            <img :src=\"currentUser.avatar\" class=\"avatar\" @click=\"currentModal = 'update-avatar'\">    \n            <h2>{{ currentUser.name }} <small>(role:{{ currentUser.role }})</small> <i class=\"fa fa fa-pencil edit\" @click=\"currentModal = 'update-profile'\"></i></h2>\n            <h4>{{ currentUser.full_name }}</h4>\n            <h4>{{ currentUser.birth_date }}</h4>\n            <h4>{{ currentUser.address }}</h4>\n            <h4>{{ currentUser.zip_code }}</h4>\n        </div>\n    </div><br>\n    <div class=\"row\">\n        <div class=\"col-md-8 col-md-offset-2\">\n            <div id=\"map\"></div>\n        </div>\n    </div>\n    <component :is=\"currentModal\" :show.sync=\"currentModal\"></component>\n</div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"container\">\n    <div class=\"row\">\n        <div class=\"col-md-8 col-md-offset-2\">\n            <img v-show=\"currentUser.avatar\" :src=\"currentUser.avatar\" class=\"avatar\" @click=\"editAvatar()\">    \n            <h2 class=\"text-capitalize\">{{ currentUser.name +\"\\'s\" }} Profile  <i class=\"fa fa fa-pencil edit\" @click=\"editUser()\"></i></h2>\n            <h4>{{ currentUser.full_name }}</h4>\n            <h4>{{ currentUser.birth_date }}</h4>\n            <h4>{{ currentUser.address }}</h4>\n            <h4>{{ currentUser.zip_code }}</h4>\n        </div>\n    </div><br>\n    <div class=\"row\">\n        <div class=\"col-md-8 col-md-offset-2\">\n            <div v-show=\"map\" id=\"map\"></div>\n        </div>\n    </div>\n    <component :is=\"currentModal\" :model=\"editedUser\"></component>\n</div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -12717,9 +12741,9 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-f92e9ab2", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"./shared/update-avatar.vue":13,"./shared/update-profile.vue":14,"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],10:[function(require,module,exports){
+},{"../vuex/actions":18,"../vuex/getters":19,"./shared/update-avatar.vue":14,"./shared/update-profile.vue":15,"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],10:[function(require,module,exports){
 var __vueify_insert__ = require("vueify/lib/insert-css")
-var __vueify_style__ = __vueify_insert__.insert("\n@media( min-width: 768px) { \n\t.modal-container {\n  \t\twidth: 35%;\n  \t\tmin-width: 430px;\n  \t\tmin-height: 200px\n\t}\n}\n")
+var __vueify_style__ = __vueify_insert__.insert("\n\n")
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -12732,9 +12756,12 @@ var _modal2 = _interopRequireDefault(_modal);
 
 var _actions = require('../../vuex/actions');
 
+var _getters = require('../../vuex/getters');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
+	components: { modal: _modal2.default },
 	data: function data() {
 		return {
 			user: {
@@ -12746,56 +12773,31 @@ exports.default = {
 		};
 	},
 
-	computed: {
-		showModal: {
-			get: function get() {
-				return this.show != '';
-			},
-			set: function set(val) {
-				this.show = '';
-			}
-		}
-	},
 	vuex: {
-		actions: {
-			createUser: _actions.createUser
-		}
-	},
-	components: {
-		modal: _modal2.default
+		getters: { form: _getters.form },
+		actions: { createUser: _actions.createUser, cancelForm: _actions.cancelForm }
 	},
 	props: {
-		show: {
-			type: String,
-			required: true,
-			twoWay: true
-		},
 		model: {
 			type: Object,
 			required: true
 		}
 	},
 	methods: {
-		sendUser: function sendUser() {
-			var formData = new FormData(document.getElementById('userCreateForm'));
+		sendForm: function sendForm() {
+			var formData = new FormData(document.getElementById('createForm'));
 			this.createUser(formData);
-			if (!this.errors) {
-				this.showModal = false;
-				this.show = '';
-				return;
-			}
-			// console.log(this.errors)
 		}
 	}
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t<modal :show.sync=\"showModal\">\n\t\t<h2 slot=\"header\">Crear Nuevo Usuario</h2>\n\t\t<template slot=\"body\">\n    \t\t<form id=\"userCreateForm\" role=\"form\" method=\"POST\">\n\n    \t\t\t\t\t<div class=\"form-group\">\n                            <label for=\"name\">Role</label>\n                            <select name=\"role\" id=\"role\" class=\"form-control\" v-model=\"user.role\">\n\t\t\t\t\t    \t\t<option value=\"admin\">Administrador</option>\n\t\t\t\t\t    \t\t<option value=\"user\">Usuario</option>\n\t\t\t\t\t    \t</select>\n                        </div>\n                        <div class=\"form-group\">\n                            <label for=\"name\">Nombre de Usuario</label>\n                            <input id=\"name\" type=\"text\" class=\"form-control\" name=\"name\" value=\"\">\n                        </div>\n\n                        <div class=\"form-group\">\n                            <label for=\"email\">Correo Electrónico</label>\n                            <input id=\"email\" type=\"email\" class=\"form-control\" name=\"email\" value=\"\">\n                        </div>\n\n                        <div class=\"form-group\">\n                            <label for=\"password\">Contraseña</label>\n                            <input id=\"password\" type=\"text\" class=\"form-control\" name=\"password\">\n                        </div>\n                    </form>\n\t\t</template>\n\t\t<button slot=\"footer\" type=\"submit\" @click.prevent=\"sendUser\" class=\"pull-right btn btn-primary\">Crear Usuario</button>\n\t</modal>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t<modal v-if=\"form.show\">\n\t\t<template slot=\"header\">\n\t\t\t<h2>Create New User</h2>\n\t\t</template>\n\n\t\t<template slot=\"body\">\n    \t\t<form id=\"createForm\" role=\"form\" method=\"POST\">\n\t\t\t\t<div class=\"form-group\">\n                    <label for=\"name\">Role</label>\n                    <select name=\"role\" id=\"role\" class=\"form-control\" v-model=\"user.role\">\n\t\t\t    \t\t<option value=\"admin\">Admin</option>\n\t\t\t    \t\t<option value=\"user\">User</option>\n\t\t\t    \t</select>\n                </div>\n\n                <div class=\"form-group\" :class=\"{'has-error': form.errors.name }\">\n                    <label for=\"name\">User Name</label>\n                    <input id=\"name\" type=\"text\" class=\"form-control\" name=\"name\" value=\"\">\n                    <span class=\"help-block\" v-if=\"form.errors.name\">\n\t\t\t            {{ form.errors.name }}\n\t\t\t\t    </span>\n                </div>\n\n                <div class=\"form-group\" :class=\"{'has-error': form.errors.email }\">\n                    <label for=\"email\">Email</label>\n                    <input id=\"email\" type=\"email\" class=\"form-control\" name=\"email\" value=\"\">\n                    <span class=\"help-block\" v-if=\"form.errors.email\">\n\t\t\t\t            {{ form.errors.email }}\n\t\t\t\t    </span>\n                </div>\n\n                <div class=\"form-group\" :class=\"{'has-error': form.errors.password }\">\n                    <label for=\"password\">Password</label>\n                    <input id=\"password\" type=\"text\" class=\"form-control\" name=\"password\">\n                    <span class=\"help-block\" v-if=\"form.errors.password\">\n\t\t\t\t        {{ form.errors.password }}\n\t\t\t\t    </span>\n                </div> \n            </form>\n\t\t</template>\n\n\t\t<template slot=\"footer\">\n\t\t\t<button class=\" btn btn-default\" @click=\"cancelForm\">Cancel</button>\n            <button :disabled=\"form.busy\" @click=\"sendForm\" class=\" btn btn-info\">\n            \tCreate User <i v-if=\"form.busy\" class=\"fa fa-spinner fa-pulse fa-fw\"></i>\n            </button>\n\t\t</template>\n\t</modal>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
   module.hot.dispose(function () {
-    __vueify_insert__.cache["\n@media( min-width: 768px) { \n\t.modal-container {\n  \t\twidth: 35%;\n  \t\tmin-width: 430px;\n  \t\tmin-height: 200px\n\t}\n}\n"] = false
+    __vueify_insert__.cache["\n\n"] = false
     document.head.removeChild(__vueify_style__)
   })
   if (!module.hot.data) {
@@ -12804,164 +12806,9 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-1c83de44", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../vuex/actions":17,"./modal.vue":11,"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],11:[function(require,module,exports){
+},{"../../vuex/actions":18,"../../vuex/getters":19,"./modal.vue":12,"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],11:[function(require,module,exports){
 var __vueify_insert__ = require("vueify/lib/insert-css")
-var __vueify_style__ = __vueify_insert__.insert("\n.close-button {\n\tfont-size: 25px;\n\tfont-weight: 100;\n\tcolor: tomato;\n\tposition: absolute;\n\ttop: 15px;\n\tleft: 25px;\n\tcursor: pointer;\n}\n\n.modal-mask {\n  position: fixed;\n  z-index: 9998;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, .5);\n  display: table;\n  -webkit-transition: opacity .3s ease;\n  transition: opacity .3s ease;\n}\n\n.modal-wrapper {\n  display: table-cell;\n  vertical-align: middle;\n}\n\n@media( min-width: 768px) { \n\t.modal-container {\n  \t\twidth: 55%;\n  \t\tmin-width: 430px;\n  \t\tmin-height: 200px\n\t}\n}\n\n\n\n.modal-container {\n  margin: 0px auto;\n  padding: 20px 30px;\n  background-color: #fff;\n  border-radius: 4px;\n  box-shadow: 0 2px 8px rgba(0, 0, 0, .33);\n  -webkit-transition: all .3s ease;\n  transition: all .3s ease;\n  font-family: Helvetica, Arial, sans-serif;\n  position: relative;\n}\n\n.modal-header h3 {\n  margin: 0;\n}\n\n.modal-body {\n  /*margin: 20px 0;*/\n}\n\n.modal-header, .modal-footer {\n\tborder: none;\n}\n\n.modal-default-button {\n  float: right;\n}\n\n/*\n * the following styles are auto-applied to elements with\n * v-transition=\"modal\" when their visiblity is toggled\n * by Vue.js.\n *\n * You can easily play with the modal transition by editing\n * these styles.\n */\n\n.modal-enter, .modal-leave {\n  opacity: 0;\n}\n\n.modal-enter .modal-container,\n.modal-leave .modal-container {\n  -webkit-transform: scale(1.1);\n  transform: scale(1.1);\n}\n")
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-exports.default = {
-	props: {
-		show: {
-			type: Boolean,
-			required: true,
-			twoWay: true,
-			default: false
-		},
-		cancel: {
-			type: Boolean,
-			default: true
-		}
-	}
-};
-if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t<div class=\"modal-mask\" v-show=\"show\" transition=\"modal\">\n\t<div class=\"modal-wrapper\">\n\t\t<div class=\"modal-container\">\n\t\t\t<div class=\"modal-header\">\n\t\t\t\t<slot name=\"header\">\n\t\t\t\t</slot>\n\t\t\t</div>\n\t\t\t<div class=\"modal-body\">\n\t\t\t\t<slot name=\"body\">\n\t\t\t\t</slot>\n\t\t\t</div>\n\t\t\t<div class=\"modal-footer\">\n\t\t\t\t<button v-if=\"cancel\" class=\"btn btn-danger\" @click=\"show = false\">Cancelar</button>\n\t\t\t\t<slot name=\"footer\">\n\t\t\t\t</slot>\n\t\t\t</div>\n\t\t</div>\n\t</div>\n  </div>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  module.hot.dispose(function () {
-    __vueify_insert__.cache["\n.close-button {\n\tfont-size: 25px;\n\tfont-weight: 100;\n\tcolor: tomato;\n\tposition: absolute;\n\ttop: 15px;\n\tleft: 25px;\n\tcursor: pointer;\n}\n\n.modal-mask {\n  position: fixed;\n  z-index: 9998;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, .5);\n  display: table;\n  -webkit-transition: opacity .3s ease;\n  transition: opacity .3s ease;\n}\n\n.modal-wrapper {\n  display: table-cell;\n  vertical-align: middle;\n}\n\n@media( min-width: 768px) { \n\t.modal-container {\n  \t\twidth: 55%;\n  \t\tmin-width: 430px;\n  \t\tmin-height: 200px\n\t}\n}\n\n\n\n.modal-container {\n  margin: 0px auto;\n  padding: 20px 30px;\n  background-color: #fff;\n  border-radius: 4px;\n  box-shadow: 0 2px 8px rgba(0, 0, 0, .33);\n  -webkit-transition: all .3s ease;\n  transition: all .3s ease;\n  font-family: Helvetica, Arial, sans-serif;\n  position: relative;\n}\n\n.modal-header h3 {\n  margin: 0;\n}\n\n.modal-body {\n  /*margin: 20px 0;*/\n}\n\n.modal-header, .modal-footer {\n\tborder: none;\n}\n\n.modal-default-button {\n  float: right;\n}\n\n/*\n * the following styles are auto-applied to elements with\n * v-transition=\"modal\" when their visiblity is toggled\n * by Vue.js.\n *\n * You can easily play with the modal transition by editing\n * these styles.\n */\n\n.modal-enter, .modal-leave {\n  opacity: 0;\n}\n\n.modal-enter .modal-container,\n.modal-leave .modal-container {\n  -webkit-transform: scale(1.1);\n  transform: scale(1.1);\n}\n"] = false
-    document.head.removeChild(__vueify_style__)
-  })
-  if (!module.hot.data) {
-    hotAPI.createRecord("_v-0386f275", module.exports)
-  } else {
-    hotAPI.update("_v-0386f275", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
-  }
-})()}
-},{"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],12:[function(require,module,exports){
-var __vueify_insert__ = require("vueify/lib/insert-css")
-var __vueify_style__ = __vueify_insert__.insert("\n.avatar-thumb {\n    width:  32px; \n    height: 32px; \n    position:   absolute; \n    top:    10px; \n    left:   10px; \n    border-radius:  50%\n}\n")
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _actions = require('../../vuex/actions');
-
-exports.default = {
-    vuex: {
-        getters: {
-            currentUser: function currentUser(state) {
-                return state.currentUser;
-            },
-            logged: function logged(state) {
-                return state.logged;
-            }
-        },
-        actions: {
-            logout: _actions.logout
-        }
-    }
-};
-if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<nav class=\"navbar navbar-default navbar-static-top\">\n    <div class=\"container\">\n        <div class=\"navbar-header\">\n\n            <!-- Collapsed Hamburger -->\n            <button type=\"button\" class=\"navbar-toggle collapsed\" data-toggle=\"collapse\" data-target=\"#app-navbar-collapse\">\n                <span class=\"sr-only\">Toggle Navigation</span>\n                <span class=\"icon-bar\"></span>\n                <span class=\"icon-bar\"></span>\n                <span class=\"icon-bar\"></span>\n            </button>\n\n            <!-- Branding Image -->\n            <a class=\"navbar-brand\" href=\"/\">\n                Prueba4\n            </a>\n        </div>\n\n        <div class=\"collapse navbar-collapse\" id=\"app-navbar-collapse\">\n            <!-- Left Side Of Navbar -->\n            <ul class=\"nav navbar-nav\">\n                <li v-if=\"logged\"><a href=\"/home\">Dashboard</a></li>\n                <li v-if=\"currentUser.role=='admin'\"><a href=\"/admin\">Administrar</a></li>\n            </ul>\n\n            <!-- Right Side Of Navbar -->\n            <ul class=\"nav navbar-nav navbar-right\">\n                <!-- Authentication Links -->\n                    <li v-if=\"!logged\"><a href=\"/login\">Login</a></li>\n                    <li v-if=\"!logged\"><a href=\"/register\">Registro</a></li>\n                    <li class=\"dropdown\" v-if=\"logged\">\n                        <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\" role=\"button\" aria-expanded=\"false\" style=\"position:relative; padding-left:50px;\">\n                        <img class=\"avatar-thumb\" :src=\"currentUser.avatar\">\n                            {{ currentUser.name }} <span class=\"caret\"></span>\n                        </a>\n                        <ul class=\"dropdown-menu\" role=\"menu\">\n                            <li><a href=\"/profile\"><i class=\"fa fa-btn fa-user\"></i>Perfil</a></li>\n                            <li role=\"separator\" class=\"divider\"></li>\n                            <li><a href=\"/logout\" @click.prevent=\"logout\"><i class=\"fa fa-btn fa-sign-out\"></i>Logout</a></li>\n                        </ul>\n                    </li>\n            </ul>\n        </div>\n    </div>\n</nav>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  module.hot.dispose(function () {
-    __vueify_insert__.cache["\n.avatar-thumb {\n    width:  32px; \n    height: 32px; \n    position:   absolute; \n    top:    10px; \n    left:   10px; \n    border-radius:  50%\n}\n"] = false
-    document.head.removeChild(__vueify_style__)
-  })
-  if (!module.hot.data) {
-    hotAPI.createRecord("_v-0f37de31", module.exports)
-  } else {
-    hotAPI.update("_v-0f37de31", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
-  }
-})()}
-},{"../../vuex/actions":17,"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],13:[function(require,module,exports){
-var __vueify_insert__ = require("vueify/lib/insert-css")
-var __vueify_style__ = __vueify_insert__.insert("\n@media( min-width: 768px) { \n\t.modal-container {\n  \t\twidth: 35%;\n  \t\tmin-width: 430px;\n  \t\tmin-height: 200px\n\t}\n}\n")
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _modal = require('./modal.vue');
-
-var _modal2 = _interopRequireDefault(_modal);
-
-var _actions = require('../../vuex/actions');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-	data: function data() {
-		return {
-			image: ''
-		};
-	},
-
-	computed: {
-		showModal: {
-			get: function get() {
-				return this.show != '';
-			},
-			set: function set(val) {
-				this.show = '';
-			}
-		}
-	},
-	vuex: {
-		actions: {
-			uploadAvatar: _actions.uploadAvatar
-		}
-	},
-	components: {
-		modal: _modal2.default
-	},
-	props: {
-		show: {
-			type: String,
-			required: true,
-			twoWay: true
-		}
-	},
-	methods: {
-		sendAvatar: function sendAvatar() {
-			var formData = new FormData(document.getElementById('avatarForm'));
-			this.uploadAvatar(formData);
-			this.showModal = false;
-			this.show = '';
-			this.image = '';
-		}
-	}
-};
-if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t<modal :show.sync=\"showModal\">\n\t\t<h2 slot=\"header\" v-show=\"!image\">Seleccione una imagen para el Perfil</h2>\n\t\t<template slot=\"body\">\n    \t\t<form id=\"avatarForm\" enctype=\"multipart/form-data\" action=\"/profiles\" method=\"POST\">\n            \t<input type=\"file\" name=\"avatar\">\n            \t\n        \t</form>\n\t\t</template>\n\t\t<button slot=\"footer\" type=\"submit\" @click.prevent=\"sendAvatar\" class=\"pull-right btn btn-primary\">Actualizar Avatar</button>\n\t</modal>\n"
-if (module.hot) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), true)
-  if (!hotAPI.compatible) return
-  module.hot.dispose(function () {
-    __vueify_insert__.cache["\n@media( min-width: 768px) { \n\t.modal-container {\n  \t\twidth: 35%;\n  \t\tmin-width: 430px;\n  \t\tmin-height: 200px\n\t}\n}\n"] = false
-    document.head.removeChild(__vueify_style__)
-  })
-  if (!module.hot.data) {
-    hotAPI.createRecord("_v-61fedea5", module.exports)
-  } else {
-    hotAPI.update("_v-61fedea5", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
-  }
-})()}
-},{"../../vuex/actions":17,"./modal.vue":11,"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],14:[function(require,module,exports){
-var __vueify_insert__ = require("vueify/lib/insert-css")
-var __vueify_style__ = __vueify_insert__.insert("\n.error {\n\tcolor: red;\n}\n")
+var __vueify_style__ = __vueify_insert__.insert("\n@media( min-width: 768px) { \n\t.modal-container small {\n  \t\twidth: 35%;\n  \t\tmin-width: 430px;\n\t}\n}\n")
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -12974,100 +12821,100 @@ var _modal2 = _interopRequireDefault(_modal);
 
 var _actions = require('../../vuex/actions');
 
+var _getters = require('../../vuex/getters');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
-  data: function data() {
-    return {
-      full_name: '',
-      birth_date: '',
-      address: '',
-      zip_code: ''
-    };
-  },
-
   components: { modal: _modal2.default },
-  computed: {
-    showModal: {
-      get: function get() {
-        return this.show != '';
-      },
-      set: function set(val) {
-        this.show = '';
-      }
-    },
-    cancel: function cancel() {
-      return this.show != 'create-profile';
-    },
-    minDate: function minDate() {
-      var today = new Date();
-      var year = today.getFullYear() - 18;
-      var month = today.getMonth() + 1;
-      var day = today.getDate();
-
-      month = month > 9 ? month : '0' + month;
-
-      day = day > 9 ? day : '0' + day;
-
-      return year + '-' + month + '-' + day;
-    },
-    validateForm: function validateForm() {
-      if (!this.full_name || !this.birth_date || !this.address || !this.zip_code) {
-        return false;
-      }
-
-      return true;
-    }
-  },
   vuex: {
-    getters: {
-      currentUser: function currentUser(state) {
-        return state.currentUser;
-      }
-    },
-    actions: {
-      uploadProfile: _actions.uploadProfile
-    }
+    getters: { form: _getters.form },
+    actions: { deleteUser: _actions.deleteUser, cancelForm: _actions.cancelForm }
   },
   props: {
-    show: {
-      type: String,
-      required: true,
-      twoWay: true
-    }
-  },
-  methods: {
-    sendAvatar: function sendAvatar() {
-      var formData = new FormData(document.getElementById('profileForm'));
-      this.uploadProfile(formData, this.currentUser.id);
-      if (!this.errors) {
-        this.showModal = false;
-        this.show = '';
-        return;
-      }
-      console.log(this.errors);
+    model: {
+      type: Object,
+      required: true
     }
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t<modal :show.sync=\"showModal\" :cancel=\"cancel\">\n\t\t<h2 slot=\"header\">Actualizar Perfil</h2>\n\t\t<template slot=\"body\">\n    \t\t<form id=\"profileForm\" method=\"POST\">\n    \t\t\t<input type=\"hidden\" name=\"_method\" value=\"PATCH\">\n            \t  <div class=\"form-group\">\n\t\t\t\t    <label for=\"full_name\">Nombre Completo <span class=\"error\" v-show=\"full_name == ''\">*</span></label>\n\t\t\t\t    <input v-model=\"full_name\" :value=\"currentUser.full_name\" type=\"text\" class=\"form-control\" id=\"full_name\" name=\"full_name\" placeholder=\"Nombres y Apellidos\">\n\t\t\t\t  </div>\n\n\t\t\t\t  <div class=\"row\">\n\t\t\t\t  <div class=\"form-group col-md-4\">\n\t\t\t\t    <label for=\"birth_date\">Fecha de Nacimiento <span class=\"error\" v-show=\"birth_date == ''\">*</span></label>\n\t\t\t\t    <input v-model=\"birth_date\" :value=\"currentUser.birth_date\" type=\"date\" max=\"{{ minDate }}\" class=\"form-control\" id=\"birth_date\" name=\"birth_date\" placeholder=\"Fecha de Nacimiento\">\n\t\t\t\t  </div>\n\t\t\t\t  <div class=\"form-group col-md-8\">\n\t\t\t\t    <label for=\"avatar\">Foto de Perfil</label>\n\t\t\t\t    <input type=\"file\" id=\"avatar\" name=\"avatar\">\n\t\t\t\t  </div>\n\t\t\t\t  </div>\n\t\t\t\t  <div class=\"form-group\">\n\t\t\t\t    <label for=\"address\">Dirección <span class=\"error\" v-show=\"address == ''\">*</span></label>\n\t\t\t\t    <input v-model=\"address\" :value=\"currentUser.address\" type=\"text\" class=\"form-control\" id=\"address\" name=\"address\" placeholder=\"Calle Av Barrio Urbanización, Ciudad, Estado, Pais\">\n\n\t\t\t\t  </div>\n\t\t\t\t  <div class=\"row\">\n\t\t\t\t  \t\t<div class=\"form-group col-md-4\">\n\t\t\t\t\t    <label for=\"zip_code\">Codigo Postal <span class=\"error\" v-show=\"zip_code == ''\">*</span></label>\n\t\t\t\t\t    <input v-model=\"zip_code\" :value=\"currentUser.zip_code\" type=\"text\" class=\"form-control\" id=\"zip_code\" name=\"zip_code\" placeholder=\"Codigo Postal\">\n\t\t\t\t\t  </div>\n\t\t\t\t  </div>\n\t\t\t\t  <p v-show=\"!validateForm\"><span class=\"error\">*</span> Requeridos</p>\n        \t</form>\n\t\t</template>\n\t\t<template slot=\"footer\">\n\t\t<button v-if=\"validateForm\" type=\"submit\" @click.prevent=\"sendAvatar\" class=\"pull-right btn btn-primary\">Actualizar Perfil</button>\n\t\t</template>\n\n\t</modal>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t<modal v-if=\"form.show\">\n\t\t<template slot=\"header\" class=\"text-center\">\n\t\t\t<h2 class=\"text-center text-capitalize\">Delete User {{ model.name }}? </h2>\n\t\t</template>\n\n\t\t<template slot=\"header\">\n\t\t\t\n\t\t\t<p class=\"text-center\"><br>Please note that this operations <strong>cannot be undone!</strong></p>\n\t\t</template>\n\t\t\n\t\t<template slot=\"footer\">\n\t\t\t<button class=\" btn btn-default\" @click=\"cancelForm\">Cancel</button>\n            <button :disabled=\"form.busy\" @click=\"deleteUser(model)\" class=\" btn btn-danger\">Delete User</button>\n\t\t</template>\n\t</modal>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
   module.hot.dispose(function () {
-    __vueify_insert__.cache["\n.error {\n\tcolor: red;\n}\n"] = false
+    __vueify_insert__.cache["\n@media( min-width: 768px) { \n\t.modal-container small {\n  \t\twidth: 35%;\n  \t\tmin-width: 430px;\n\t}\n}\n"] = false
     document.head.removeChild(__vueify_style__)
   })
   if (!module.hot.data) {
-    hotAPI.createRecord("_v-593331e6", module.exports)
+    hotAPI.createRecord("_v-bb106316", module.exports)
   } else {
-    hotAPI.update("_v-593331e6", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+    hotAPI.update("_v-bb106316", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../vuex/actions":17,"./modal.vue":11,"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],15:[function(require,module,exports){
+},{"../../vuex/actions":18,"../../vuex/getters":19,"./modal.vue":12,"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],12:[function(require,module,exports){
 var __vueify_insert__ = require("vueify/lib/insert-css")
-var __vueify_style__ = __vueify_insert__.insert("\n.error {\n\tcolor: red;\n}\n")
+var __vueify_style__ = __vueify_insert__.insert("\n.close-button {\n\tfont-size: 25px;\n\tfont-weight: 100;\n\tcolor: tomato;\n\tposition: absolute;\n\ttop: 15px;\n\tleft: 25px;\n\tcursor: pointer;\n}\n\n.modal-mask {\n  position: fixed;\n  z-index: 9998;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, .5);\n  display: table;\n  -webkit-transition: opacity .3s ease;\n  transition: opacity .3s ease;\n}\n\n.modal-wrapper {\n  display: table-cell;\n  vertical-align: middle;\n}\n\n@media( min-width: 768px) { \n\t.modal-container {\n  \t\twidth: 50%;\n  \t\tmin-width: 430px;\n\t}\n}\n\n\n.modal-container {\n  margin: 0px auto;\n  padding: 20px 30px;\n  background-color: #fff;\n  border-radius: 4px;\n  box-shadow: 0 2px 8px rgba(0, 0, 0, .33);\n  -webkit-transition: all .3s ease;\n  transition: all .3s ease;\n  font-family: Helvetica, Arial, sans-serif;\n  position: relative;\n  overflow-y: auto;\n  max-height: 100vh;\n}\n\n.modal-header h3 {\n  margin: 0;\n}\n\n.modal-header, .modal-footer {\n\tborder: none;\n}\n\n.modal-default-button {\n  float: right;\n}\n\n/*\n * the following styles are auto-applied to elements with\n * v-transition=\"modal\" when their visiblity is toggled\n * by Vue.js.\n *\n * You can easily play with the modal transition by editing\n * these styles.\n */\n\n.modal-enter, .modal-leave {\n  opacity: 0;\n}\n\n.modal-enter .modal-container,\n.modal-leave .modal-container {\n  -webkit-transform: scale(1.1);\n  transform: scale(1.1);\n}\n")
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t<div class=\"modal-mask\" transition=\"modal\">\n\t<div class=\"modal-wrapper\">\n\t\t<div class=\"modal-container\">\n\t\t\t<div class=\"modal-header\">\n\t\t\t\t<slot name=\"header\">\n\t\t\t\t</slot>\n\t\t\t</div>\n\t\t\t<div class=\"modal-body\">\n\t\t\t\t<slot name=\"body\">\n\t\t\t\t</slot>\n\t\t\t</div>\n\t\t\t<div class=\"modal-footer\">\n\t\t\t\t<slot name=\"footer\">\n\t\t\t\t</slot>\n\t\t\t</div>\n\t\t</div>\n\t</div>\n  </div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  module.hot.dispose(function () {
+    __vueify_insert__.cache["\n.close-button {\n\tfont-size: 25px;\n\tfont-weight: 100;\n\tcolor: tomato;\n\tposition: absolute;\n\ttop: 15px;\n\tleft: 25px;\n\tcursor: pointer;\n}\n\n.modal-mask {\n  position: fixed;\n  z-index: 9998;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, .5);\n  display: table;\n  -webkit-transition: opacity .3s ease;\n  transition: opacity .3s ease;\n}\n\n.modal-wrapper {\n  display: table-cell;\n  vertical-align: middle;\n}\n\n@media( min-width: 768px) { \n\t.modal-container {\n  \t\twidth: 50%;\n  \t\tmin-width: 430px;\n\t}\n}\n\n\n.modal-container {\n  margin: 0px auto;\n  padding: 20px 30px;\n  background-color: #fff;\n  border-radius: 4px;\n  box-shadow: 0 2px 8px rgba(0, 0, 0, .33);\n  -webkit-transition: all .3s ease;\n  transition: all .3s ease;\n  font-family: Helvetica, Arial, sans-serif;\n  position: relative;\n  overflow-y: auto;\n  max-height: 100vh;\n}\n\n.modal-header h3 {\n  margin: 0;\n}\n\n.modal-header, .modal-footer {\n\tborder: none;\n}\n\n.modal-default-button {\n  float: right;\n}\n\n/*\n * the following styles are auto-applied to elements with\n * v-transition=\"modal\" when their visiblity is toggled\n * by Vue.js.\n *\n * You can easily play with the modal transition by editing\n * these styles.\n */\n\n.modal-enter, .modal-leave {\n  opacity: 0;\n}\n\n.modal-enter .modal-container,\n.modal-leave .modal-container {\n  -webkit-transform: scale(1.1);\n  transform: scale(1.1);\n}\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord("_v-0386f275", module.exports)
+  } else {
+    hotAPI.update("_v-0386f275", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],13:[function(require,module,exports){
+var __vueify_insert__ = require("vueify/lib/insert-css")
+var __vueify_style__ = __vueify_insert__.insert("\n.avatar-thumb {\n    top: 10px; \n    left: 10px; \n    width: 32px; \n    height: 32px; \n    position: absolute; \n    border-radius: 50%;\n}\n")
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = {
+    vuex: {
+        getters: {
+            currentUser: function currentUser(state) {
+                return state.currentUser;
+            }
+        }
+    }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t<a href=\"#\" class=\"dropdown-toggle text-capitalize\" data-toggle=\"dropdown\" role=\"button\" aria-expanded=\"false\" style=\"position:relative; padding-left:50px;\">\n    <img class=\"avatar-thumb text-capitalize\" alt=\" \" :src=\"currentUser.avatar\" v-show=\"currentUser.avatar\">\n        {{ currentUser.name }} <span class=\"caret\"></span>\n    </a>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  module.hot.dispose(function () {
+    __vueify_insert__.cache["\n.avatar-thumb {\n    top: 10px; \n    left: 10px; \n    width: 32px; \n    height: 32px; \n    position: absolute; \n    border-radius: 50%;\n}\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord("_v-4d360e04", module.exports)
+  } else {
+    hotAPI.update("_v-4d360e04", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],14:[function(require,module,exports){
+var __vueify_insert__ = require("vueify/lib/insert-css")
+var __vueify_style__ = __vueify_insert__.insert("\n\n")
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -13080,99 +12927,211 @@ var _modal2 = _interopRequireDefault(_modal);
 
 var _actions = require('../../vuex/actions');
 
+var _getters = require('../../vuex/getters');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
+	components: { modal: _modal2.default },
 	data: function data() {
 		return {
-			user: {
-				full_name: '',
-				birth_date: '',
-				address: '',
-				zip_code: '',
-				role: ''
-			}
+			image: ''
 		};
 	},
 
-	components: { modal: _modal2.default },
-	computed: {
-		showModal: {
-			get: function get() {
-				return this.show != '';
-			},
-			set: function set(val) {
-				this.show = '';
-			}
-		},
-		cancel: function cancel() {
-			return this.show != 'create-profile';
-		},
-		minDate: function minDate() {
-			var today = new Date();
-			var year = today.getFullYear() - 18;
-			var month = today.getMonth() + 1;
-			var day = today.getDate();
-
-			month = month > 9 ? month : '0' + month;
-
-			day = day > 9 ? day : '0' + day;
-
-			return year + '-' + month + '-' + day;
-		},
-		validateForm: function validateForm() {
-			if (!this.user.full_name || !this.user.birth_date || !this.user.address || !this.user.zip_code) {
-				return false;
-			}
-
-			return true;
-		},
-		thisRole: {
-			get: function get() {
-				return this.model.role;
-			},
-			set: function set(val) {
-				this.user.role = val;
-			}
-		}
-	},
 	vuex: {
-		actions: {
-			updateUser: _actions.updateUser
-		}
+		getters: { form: _getters.form },
+		actions: { updateAvatar: _actions.updateAvatar, cancelForm: _actions.cancelForm }
 	},
 	props: {
-		show: {
-			type: String,
-			required: true,
-			twoWay: true
-		},
 		model: {
 			type: Object,
 			required: true
 		}
 	},
 	methods: {
-		sendUser: function sendUser() {
-			var formData = new FormData(document.getElementById('userProfileForm'));
-			this.updateUser(formData, this.model.id);
-			if (!this.errors) {
-				this.showModal = false;
-				this.show = '';
-				return;
-			}
-			// console.log(this.errors)
+		sendForm: function sendForm() {
+			var formData = new FormData(document.getElementById('avatarForm'));
+			this.updateAvatar(formData);
 		}
 	}
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t<modal :show.sync=\"showModal\" :cancel=\"cancel\">\n\t\t<h2 slot=\"header\">Actualizar Usuario: {{ model.name }}</h2>\n\t\t<template slot=\"body\">\n    \t\t<form id=\"userProfileForm\" method=\"POST\">\n    \t\t\t<input type=\"hidden\" name=\"_method\" value=\"PATCH\">\n\n    \t\t\t\t<div class=\"form-group\">\n\t\t\t\t\t    <label for=\"role\">Role</label>\n\t\t\t\t\t    <select name=\"role\" id=\"role\" class=\"form-control\" v-model=\"thisRole\">\n\t\t\t\t\t    \t<option value=\"admin\">Administrador</option>\n\t\t\t\t\t    \t<option value=\"user\">Usuario</option>\n\t\t\t\t\t    </select>\n\t\t\t\t    \n\t\t\t\t  \t</div>\n\n            \t  <div class=\"form-group\">\n\t\t\t\t    <label for=\"full_name\">Nombre Completo <span class=\"error\" v-show=\"user.full_name == ''\">*</span></label>\n\t\t\t\t    <input v-model=\"user.full_name\" :value=\"model.full_name\" type=\"text\" class=\"form-control\" id=\"full_name\" name=\"full_name\" placeholder=\"Nombres y Apellidos\">\n\t\t\t\t  </div>\n\n\t\t\t\t  <div class=\"row\">\n\t\t\t\t  <div class=\"form-group col-md-4\">\n\t\t\t\t    <label for=\"birth_date\">Fecha de Nacimiento <span class=\"error\" v-show=\"user.birth_date == ''\">*</span></label>\n\t\t\t\t    <input v-model=\"user.birth_date\" :value=\"model.birth_date\" type=\"date\" max=\"{{ minDate }}\" class=\"form-control\" id=\"birth_date\" name=\"birth_date\" placeholder=\"Fecha de Nacimiento\">\n\t\t\t\t  </div>\n\t\t\t\t  <div class=\"form-group col-md-8\">\n\t\t\t\t    <label for=\"avatar\">Foto de Perfil</label>\n\t\t\t\t    <input type=\"file\" id=\"avatar\" name=\"avatar\">\n\t\t\t\t  </div>\n\t\t\t\t  </div>\n\t\t\t\t  <div class=\"form-group\">\n\t\t\t\t    <label for=\"address\">Dirección <span class=\"error\" v-show=\"user.address == ''\">*</span></label>\n\t\t\t\t    <input v-model=\"user.address\" :value=\"model.address\" type=\"text\" class=\"form-control\" id=\"address\" name=\"address\" placeholder=\"Calle Av Barrio Urbanización, Ciudad, Estado, Pais\">\n\n\t\t\t\t  </div>\n\t\t\t\t  <div class=\"row\">\n\t\t\t\t  \t\t<div class=\"form-group col-md-4\">\n\t\t\t\t\t    <label for=\"zip_code\">Codigo Postal <span class=\"error\" v-show=\"user.zip_code == ''\">*</span></label>\n\t\t\t\t\t    <input v-model=\"user.zip_code\" :value=\"model.zip_code\" type=\"text\" class=\"form-control\" id=\"zip_code\" name=\"zip_code\" placeholder=\"Codigo Postal\">\n\t\t\t\t\t  </div>\n\t\t\t\t  </div>\n\t\t\t\t  <p v-show=\"!validateForm\"><span class=\"error\">*</span> Requeridos</p>\n        \t</form>\n\t\t</template>\n\t\t<template slot=\"footer\">\n\t\t<button v-if=\"validateForm\" type=\"submit\" @click.prevent=\"sendUser\" class=\"pull-right btn btn-primary\">Actualizar Perfil</button>\n\t\t</template>\n\n\t</modal>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t<modal v-if=\"form.show\">\n\t\t<template slot=\"header\">\n\t\t\t<h2 class=\"text-center\">Select a Profile's Image</h2>\n\t\t</template>\n\n\t\t<template slot=\"body\">\n    \t\t<form id=\"avatarForm\" enctype=\"multipart/form-data\" method=\"POST\">\n            \t<div class=\"form-group\" :class=\"{'has-error': form.errors.avatar }\">\n\t\t\t    \t<input type=\"file\" id=\"avatar\" name=\"avatar\">\n\t\t\t    \t<span class=\"help-block\" v-if=\"form.errors.avatar\">\n\t\t            \t{{ form.errors.avatar }}\n\t\t\t    \t</span>\n\t\t\t\t</div>\n        \t</form>\n\t\t</template>\n\n\t\t<template slot=\"footer\">\n\t\t\t<button class=\"btn btn-default\" @click=\"cancelForm\">Cancel</button>\n\t\t\t<button :disabled=\"form.busy\" @click=\"sendForm\" class=\" btn btn-info\">\n            \tUpdate User <i v-if=\"form.busy\" class=\"fa fa-spinner fa-pulse fa-fw\"></i>\n            </button>\n\t\t</template>\n\t</modal>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
   module.hot.dispose(function () {
-    __vueify_insert__.cache["\n.error {\n\tcolor: red;\n}\n"] = false
+    __vueify_insert__.cache["\n\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord("_v-61fedea5", module.exports)
+  } else {
+    hotAPI.update("_v-61fedea5", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"../../vuex/actions":18,"../../vuex/getters":19,"./modal.vue":12,"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],15:[function(require,module,exports){
+var __vueify_insert__ = require("vueify/lib/insert-css")
+var __vueify_style__ = __vueify_insert__.insert("\n\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _modal = require('./modal.vue');
+
+var _modal2 = _interopRequireDefault(_modal);
+
+var _actions = require('../../vuex/actions');
+
+var _getters = require('../../vuex/getters');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  components: { modal: _modal2.default },
+  vuex: {
+    getters: { form: _getters.form },
+    actions: { updateProfile: _actions.updateProfile, cancelForm: _actions.cancelForm }
+  },
+  data: function data() {
+    return {
+      user: {
+        full_name: '',
+        birth_date: '',
+        address: '',
+        zip_code: '',
+        role: ''
+      }
+    };
+  },
+
+  computed: {
+    minDate: function minDate() {
+      var today = new Date();
+      var year = today.getFullYear() - 18;
+      var month = today.getMonth() + 1;
+      var day = today.getDate();
+
+      month = month > 9 ? month : '0' + month;
+
+      day = day > 9 ? day : '0' + day;
+
+      return year + '-' + month + '-' + day;
+    }
+  },
+  props: {
+    model: {
+      type: Object,
+      required: true
+    }
+  },
+  methods: {
+    sendForm: function sendForm() {
+      var formData = new FormData(document.getElementById('profileForm'));
+      this.updateProfile(formData, this.model.id);
+    }
+  }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t<modal v-if=\"form.show\">\n\t\t<template slot=\"header\">\n\t\t\t<h2 class=\"text-capitalize\">Edit {{ model.name + \"'s\" }} Profile</h2>\n\t\t</template>\n\n\t\t<template slot=\"body\">\n    \t\t<form id=\"profileForm\" enctype=\"multipart/form-data\" method=\"POST\">\n    \t\t\t<input type=\"hidden\" name=\"_method\" value=\"PATCH\">\n\n\t\t\t\t<div class=\"form-group\" :class=\"{'has-error': form.errors.full_name }\">\n\t\t\t\t\t<label for=\"full_name\">Full Name</label>\n\t\t\t\t\t<input :value=\"model.full_name\" type=\"text\" class=\"form-control\" id=\"full_name\" name=\"full_name\" placeholder=\"Nombres y Apellidos\">\n\t\t\t\t\t<span class=\"help-block\" v-if=\"form.errors.full_name\">\n\t\t\t            {{ form.errors.full_name }}\n\t\t\t\t    </span>\n\t\t\t\t</div>\n\n\t\t\t\t<div class=\"row\">\n\t\t\t\t  \t<div class=\"form-group col-md-4\" :class=\"{'has-error': form.errors.birth_date }\">\n\t\t\t\t    \t<label for=\"birth_date\">Birth Date</label>\n\t\t\t\t    \t<input v-model=\"user.birth_date\" :value=\"model.birth_date\" type=\"date\" max=\"{{ minDate }}\" class=\"form-control\" id=\"birth_date\" name=\"birth_date\" placeholder=\"Fecha de Nacimiento\">\n\t\t\t\t    \t<span class=\"help-block\" v-if=\"form.errors.birth_date\">\n\t\t\t            \t{{ form.errors.birth_date }}\n\t\t\t\t    \t</span>\n\t\t\t\t\t</div>\n\n\t\t\t\t  \t<div class=\"form-group col-md-8\" :class=\"{'has-error': form.errors.avatar }\">\n\t\t\t\t    \t<label for=\"avatar\">Avatar</label>\n\t\t\t\t    \t<input type=\"file\" id=\"avatar\" name=\"avatar\">\n\t\t\t\t    \t<span class=\"help-block\" v-if=\"form.errors.avatar\">\n\t\t\t            \t{{ form.errors.avatar }}\n\t\t\t\t    \t</span>\n\t\t\t\t  \t</div>\n\t\t\t\t</div>\n\n\t\t\t\t<div class=\"row\">\n\t\t\t\t\t<div class=\"form-group col-md-9\" :class=\"{'has-error': form.errors.address }\">\n\t\t\t\t\t\t<label for=\"address\">Address</label>\n\t\t\t\t\t\t<input v-model=\"user.address\" :value=\"model.address\" type=\"text\" class=\"form-control\" id=\"address\" name=\"address\" placeholder=\"Calle Av Barrio Urbanización, Ciudad, Estado, Pais\">\n\t\t\t\t\t\t<span class=\"help-block\" v-if=\"form.errors.address\">\n\t\t\t\t            {{ form.errors.address }}\n\t\t\t\t\t    </span>\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"form-group col-md-3\" :class=\"{'has-error': form.errors.zip_code }\">\n\t\t\t\t\t\t<label for=\"zip_code\">Zip Code</label>\n\t\t\t\t\t\t<input v-model=\"user.zip_code\" :value=\"model.zip_code\" type=\"text\" class=\"form-control\" id=\"zip_code\" name=\"zip_code\" placeholder=\"Codigo Postal\">\n\t\t\t\t\t\t<span class=\"help-block\" v-if=\"form.errors.zip_code\">\n\t\t\t\t            {{ form.errors.zip_code }}\n\t\t\t\t\t    </span>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n        \t</form>\n\t\t</template>\n\t\t<template slot=\"footer\">\n\t\t\t<button class=\" btn btn-default\" @click=\"cancelForm\">Cancel</button>\n\t\t\t<button :disabled=\"form.busy\" @click=\"sendForm\" class=\" btn btn-info\">\n            \tUpdate User <i v-if=\"form.busy\" class=\"fa fa-spinner fa-pulse fa-fw\"></i>\n            </button>\n\t\t</template>\n\t</modal>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  module.hot.dispose(function () {
+    __vueify_insert__.cache["\n\n"] = false
+    document.head.removeChild(__vueify_style__)
+  })
+  if (!module.hot.data) {
+    hotAPI.createRecord("_v-593331e6", module.exports)
+  } else {
+    hotAPI.update("_v-593331e6", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"../../vuex/actions":18,"../../vuex/getters":19,"./modal.vue":12,"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],16:[function(require,module,exports){
+var __vueify_insert__ = require("vueify/lib/insert-css")
+var __vueify_style__ = __vueify_insert__.insert("\n\n")
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _modal = require('./modal.vue');
+
+var _modal2 = _interopRequireDefault(_modal);
+
+var _actions = require('../../vuex/actions');
+
+var _getters = require('../../vuex/getters');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  components: { modal: _modal2.default },
+  vuex: {
+    getters: { form: _getters.form },
+    actions: { updateUser: _actions.updateUser, cancelForm: _actions.cancelForm }
+  },
+  props: {
+    model: {
+      type: Object,
+      required: true
+    }
+  },
+  data: function data() {
+    return {
+      user: {
+        full_name: '',
+        birth_date: '',
+        address: '',
+        zip_code: '',
+        role: ''
+      }
+    };
+  },
+
+  computed: {
+    minDate: function minDate() {
+      var today = new Date();
+      var year = today.getFullYear() - 18;
+      var month = today.getMonth() + 1;
+      var day = today.getDate();
+
+      month = month > 9 ? month : '0' + month;
+
+      day = day > 9 ? day : '0' + day;
+
+      return year + '-' + month + '-' + day;
+    },
+    thisRole: {
+      get: function get() {
+        return this.model.role;
+      },
+      set: function set(val) {
+        this.user.role = val;
+      }
+    }
+  },
+  methods: {
+    sendForm: function sendForm() {
+      var formData = new FormData(document.getElementById('updateForm'));
+      this.updateUser(formData, this.model.id);
+    }
+  }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n\t<modal v-if=\"form.show\">\n\t\t<template slot=\"header\">\n\t\t\t<h2 class=\"text-capitalize\">Edit {{ model.name + \"'s\" }} Profile</h2>\n\t\t</template>\n\n\t\t<template slot=\"body\">\n    \t\t<form id=\"updateForm\" method=\"POST\">\n    \t\t\t<input type=\"hidden\" name=\"_method\" value=\"PATCH\">\n    \t\t\t<div class=\"form-group\">\n\t\t\t\t    <label for=\"role\">Role</label>\n\t\t\t\t    <select name=\"role\" id=\"role\" class=\"form-control\" v-model=\"thisRole\">\n\t\t\t\t    \t<option value=\"admin\">Admin</option>\n\t\t\t\t    \t<option value=\"user\">User</option>\n\t\t\t\t    </select>\n\t\t\t  \t</div>\n\n\t\t\t\t<div class=\"form-group\" :class=\"{'has-error': form.errors.full_name }\">\n\t\t\t\t\t<label for=\"full_name\">Full Name</label>\n\t\t\t\t\t<input :value=\"model.full_name\" type=\"text\" class=\"form-control\" id=\"full_name\" name=\"full_name\" placeholder=\"Nombres y Apellidos\">\n\t\t\t\t\t<span class=\"help-block\" v-if=\"form.errors.full_name\">\n\t\t\t            {{ form.errors.full_name }}\n\t\t\t\t    </span>\n\t\t\t\t</div>\n\n\t\t\t\t<div class=\"row\">\n\t\t\t\t  \t<div class=\"form-group col-md-4\" :class=\"{'has-error': form.errors.birth_date }\">\n\t\t\t\t    \t<label for=\"birth_date\">Birth Date</label>\n\t\t\t\t    \t<input v-model=\"user.birth_date\" :value=\"model.birth_date\" type=\"date\" max=\"{{ minDate }}\" class=\"form-control\" id=\"birth_date\" name=\"birth_date\" placeholder=\"Fecha de Nacimiento\">\n\t\t\t\t    \t<span class=\"help-block\" v-if=\"form.errors.birth_date\">\n\t\t\t            \t{{ form.errors.birth_date }}\n\t\t\t\t    \t</span>\n\t\t\t\t\t</div>\n\n\t\t\t\t  \t<div class=\"form-group col-md-8\" :class=\"{'has-error': form.errors.avatar }\">\n\t\t\t\t    \t<label for=\"avatar\">Avatar</label>\n\t\t\t\t    \t<input type=\"file\" id=\"avatar\" name=\"avatar\">\n\t\t\t\t    \t<span class=\"help-block\" v-if=\"form.errors.avatar\">\n\t\t\t            \t{{ form.errors.avatar }}\n\t\t\t\t    \t</span>\n\t\t\t\t  \t</div>\n\t\t\t\t</div>\n\n\t\t\t\t<div class=\"row\">\n\t\t\t\t\t<div class=\"form-group col-md-9\" :class=\"{'has-error': form.errors.address }\">\n\t\t\t\t\t\t<label for=\"address\">Address</label>\n\t\t\t\t\t\t<input v-model=\"user.address\" :value=\"model.address\" type=\"text\" class=\"form-control\" id=\"address\" name=\"address\" placeholder=\"Calle Av Barrio Urbanización, Ciudad, Estado, Pais\">\n\t\t\t\t\t\t<span class=\"help-block\" v-if=\"form.errors.address\">\n\t\t\t\t            {{ form.errors.address }}\n\t\t\t\t\t    </span>\n\t\t\t\t\t</div>\n\n\t\t\t\t\t<div class=\"form-group col-md-3\" :class=\"{'has-error': form.errors.zip_code }\">\n\t\t\t\t\t\t<label for=\"zip_code\">Zip Code</label>\n\t\t\t\t\t\t<input v-model=\"user.zip_code\" :value=\"model.zip_code\" type=\"text\" class=\"form-control\" id=\"zip_code\" name=\"zip_code\" placeholder=\"Codigo Postal\">\n\t\t\t\t\t\t<span class=\"help-block\" v-if=\"form.errors.zip_code\">\n\t\t\t\t            {{ form.errors.zip_code }}\n\t\t\t\t\t    </span>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n        \t</form>\n\t\t</template>\n\t\t<template slot=\"footer\">\n\t\t\t<button class=\" btn btn-default\" @click=\"cancelForm\">Cancel</button>\n            <button :disabled=\"form.busy\" @click=\"sendForm\" class=\" btn btn-info\">\n            \tUpdate User <i v-if=\"form.busy\" class=\"fa fa-spinner fa-pulse fa-fw\"></i>\n            </button>\n\t\t</template>\n\t</modal>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  module.hot.dispose(function () {
+    __vueify_insert__.cache["\n\n"] = false
     document.head.removeChild(__vueify_style__)
   })
   if (!module.hot.data) {
@@ -13181,16 +13140,12 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-889a85d2", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../../vuex/actions":17,"./modal.vue":11,"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],16:[function(require,module,exports){
+},{"../../vuex/actions":18,"../../vuex/getters":19,"./modal.vue":12,"vue":4,"vue-hot-reload-api":2,"vueify/lib/insert-css":5}],17:[function(require,module,exports){
 'use strict';
 
 var _vue = require('vue');
 
 var _vue2 = _interopRequireDefault(_vue);
-
-var _vueResource = require('vue-resource');
-
-var _vueResource2 = _interopRequireDefault(_vueResource);
 
 var _store = require('./vuex/store');
 
@@ -13204,15 +13159,13 @@ var _admin = require('./components/admin.vue');
 
 var _admin2 = _interopRequireDefault(_admin);
 
-var _navBar = require('./components/shared/nav-bar.vue');
+var _navbarAvatar = require('./components/shared/navbar-avatar.vue');
 
-var _navBar2 = _interopRequireDefault(_navBar);
+var _navbarAvatar2 = _interopRequireDefault(_navbarAvatar);
 
 var _actions = require('./vuex/actions');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_vue2.default.use(_vueResource2.default);
 
 window.App = new _vue2.default({
 	el: 'body',
@@ -13222,8 +13175,8 @@ window.App = new _vue2.default({
 			getCurrentUser: _actions.getCurrentUser
 		}
 	},
-	components: { profile: _profile2.default, NavBar: _navBar2.default, admin: _admin2.default },
-	ready: function ready() {
+	components: { profile: _profile2.default, admin: _admin2.default, NavbarAvatar: _navbarAvatar2.default },
+	created: function created() {
 		this.getCurrentUser();
 	},
 
@@ -13234,13 +13187,13 @@ window.App = new _vue2.default({
 	}
 });
 
-},{"./components/admin.vue":8,"./components/profile.vue":9,"./components/shared/nav-bar.vue":12,"./vuex/actions":17,"./vuex/store":18,"vue":4,"vue-resource":3}],17:[function(require,module,exports){
+},{"./components/admin.vue":8,"./components/profile.vue":9,"./components/shared/navbar-avatar.vue":13,"./vuex/actions":18,"./vuex/store":20,"vue":4}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports.createUser = exports.updateUser = exports.deleteUser = exports.logout = exports.uploadProfile = exports.uploadAvatar = exports.getAllUsers = exports.getCurrentUser = undefined;
+exports.showForm = exports.cancelForm = exports.updateAvatar = exports.deleteUser = exports.createUser = exports.updateUser = exports.updateProfile = exports.getAllUsers = exports.getCurrentUser = undefined;
 
 var _api = require('../api');
 
@@ -13256,7 +13209,6 @@ var getCurrentUser = exports.getCurrentUser = function getCurrentUser(_ref) {
 			dispatch('LOGOUT_USER');
 			return;
 		}
-
 		dispatch('LOGIN_USER', user);
 	});
 };
@@ -13271,32 +13223,46 @@ var getAllUsers = exports.getAllUsers = function getAllUsers(_ref2) {
 	});
 };
 
-var uploadAvatar = exports.uploadAvatar = function uploadAvatar(_ref3, dataform) {
+var updateProfile = exports.updateProfile = function updateProfile(_ref3, dataform, id) {
 	var dispatch = _ref3.dispatch;
 
-	_api2.default.uploadAvatar(dataform, function (avatar) {
-		dispatch('UPDATE_AVATAR', avatar);
-	}, function (resp) {});
-};
-
-var uploadProfile = exports.uploadProfile = function uploadProfile(_ref4, dataform, id) {
-	var dispatch = _ref4.dispatch;
-
-	_api2.default.uploadProfile(dataform, id, function (profile) {
+	dispatch('SET_FORM_BUSY', true);
+	_api2.default.updateProfile(dataform, id, function (profile) {
+		dispatch('CLEAR_FORM');
 		dispatch('UPDATE_PROFILE', profile);
-	}, function (resp) {
-		for (var item in resp.data) {
-			console.log(resp.data[item][0]);
-		}
+	}, function (errors) {
+		dispatch('SET_ERRORS', errors);
+		dispatch('SET_FORM_BUSY', false);
 	});
 };
 
-var logout = exports.logout = function logout(_ref5) {
+var updateUser = exports.updateUser = function updateUser(_ref4, dataform, id) {
+	var dispatch = _ref4.dispatch;
+	var state = _ref4.state;
+
+	dispatch('SET_FORM_BUSY', true);
+	_api2.default.updateUser(dataform, id, function (data) {
+		dispatch('CLEAR_FORM');
+		dispatch('UPDATE_USERS', data.users);
+		if (state.currentUser.id == id) {
+			dispatch('UPDATE_CURRENT_USER', data.user);
+		}
+	}, function (errors) {
+		dispatch('SET_ERRORS', errors);
+		dispatch('SET_FORM_BUSY', false);
+	});
+};
+
+var createUser = exports.createUser = function createUser(_ref5, dataform) {
 	var dispatch = _ref5.dispatch;
 
-	_api2.default.logout(function (resp) {
-		dispatch('LOGOUT_USER');
-		location.reload(true);
+	dispatch('SET_FORM_BUSY', true);
+	_api2.default.createUser(dataform, function (user) {
+		dispatch('CREATE_USER', user);
+		dispatch('CLEAR_FORM');
+	}, function (errors) {
+		dispatch('SET_ERRORS', errors);
+		dispatch('SET_FORM_BUSY', false);
 	});
 };
 
@@ -13304,28 +13270,58 @@ var deleteUser = exports.deleteUser = function deleteUser(_ref6, user) {
 	var dispatch = _ref6.dispatch;
 
 	_api2.default.deleteUser(user, function (resp) {
+		dispatch('CLEAR_FORM');
 		dispatch('DELETE_USER', user);
 	});
 };
 
-var updateUser = exports.updateUser = function updateUser(_ref7, dataform, id) {
+var updateAvatar = exports.updateAvatar = function updateAvatar(_ref7, dataform) {
 	var dispatch = _ref7.dispatch;
 
-	_api2.default.updateUser(dataform, id, function (data) {
-		dispatch('UPDATE_USER', data.users);
+	dispatch('SET_FORM_BUSY', true);
+	_api2.default.uploadAvatar(dataform, function (data) {
+		dispatch('CLEAR_FORM');
 		dispatch('UPDATE_CURRENT_USER', data.user);
+	}, function (errors) {
+		dispatch('SET_ERRORS', errors);
+		dispatch('SET_FORM_BUSY', false);
 	});
 };
 
-var createUser = exports.createUser = function createUser(_ref8, dataform) {
+var cancelForm = exports.cancelForm = function cancelForm(_ref8) {
 	var dispatch = _ref8.dispatch;
 
-	_api2.default.createUser(dataform, function (user) {
-		dispatch('CREATE_USER', user);
-	});
+	dispatch('CLEAR_FORM');
 };
 
-},{"../api":7}],18:[function(require,module,exports){
+var showForm = exports.showForm = function showForm(_ref9) {
+	var dispatch = _ref9.dispatch;
+
+	dispatch('SET_FORM_SHOW', true);
+};
+
+},{"../api":7}],19:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.currentUser = currentUser;
+exports.form = form;
+exports.users = users;
+function currentUser(state) {
+	return state.currentUser;
+}
+
+function form(state) {
+	return state.form;
+}
+
+function users(state) {
+	return state.users;
+}
+
+},{}],20:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -13348,8 +13344,12 @@ _vue2.default.config.debug = true;
 var state = {
   currentUser: {},
   users: [],
-  logged: false,
-  errors: null
+  form: {
+    show: false,
+    busy: false,
+    success: false,
+    errors: {}
+  }
 };
 
 var mutations = {
@@ -13367,8 +13367,8 @@ var mutations = {
   UPDATE_PROFILE: function UPDATE_PROFILE(state, profile) {
     state.currentUser = profile;
   },
-  SET_ERRORS: function SET_ERRORS(state, value) {
-    state.errors = value;
+  SET_ERRORS: function SET_ERRORS(state, errors) {
+    state.form.errors = errors;
   },
   GET_ALL_USERS: function GET_ALL_USERS(state, users) {
     state.users = users;
@@ -13376,7 +13376,7 @@ var mutations = {
   DELETE_USER: function DELETE_USER(state, user) {
     state.users.$remove(user);
   },
-  UPDATE_USER: function UPDATE_USER(state, users) {
+  UPDATE_USERS: function UPDATE_USERS(state, users) {
     state.users = users;
   },
   UPDATE_CURRENT_USER: function UPDATE_CURRENT_USER(state, user) {
@@ -13384,6 +13384,17 @@ var mutations = {
   },
   CREATE_USER: function CREATE_USER(state, user) {
     state.users.push(user);
+  },
+  SET_FORM_BUSY: function SET_FORM_BUSY(state, value) {
+    state.form.busy = value;
+  },
+  SET_FORM_SHOW: function SET_FORM_SHOW(state, value) {
+    state.form.show = value;
+  },
+  CLEAR_FORM: function CLEAR_FORM(state, value) {
+    state.form.busy = false;
+    state.form.show = false;
+    state.form.errors = {};
   }
 };
 
@@ -13392,6 +13403,6 @@ exports.default = new _vuex2.default.Store({
   mutations: mutations
 });
 
-},{"vue":4,"vuex":6}]},{},[16]);
+},{"vue":4,"vuex":6}]},{},[17]);
 
 //# sourceMappingURL=main.js.map

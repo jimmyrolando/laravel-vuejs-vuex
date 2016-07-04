@@ -7,7 +7,6 @@ export const getCurrentUser = ({ dispatch }) => {
 			dispatch('LOGOUT_USER');
 			return 	
 		}
-
 		dispatch('LOGIN_USER', user);
 	})
 }
@@ -21,47 +20,78 @@ export const getAllUsers = ({ dispatch }) => {
 	})
 }
 
-export const uploadAvatar = ({ dispatch }, dataform ) => {
-	api.uploadAvatar( dataform , avatar => { 
-		dispatch('UPDATE_AVATAR', avatar);
-	},
-		resp => {  }
+export const updateProfile = ({ dispatch }, dataform, id ) => {
+	dispatch('SET_FORM_BUSY',true);
+	api.updateProfile( dataform, id, 
+		profile => {
+			dispatch('CLEAR_FORM');
+			dispatch('UPDATE_PROFILE', profile);
+		}, 
+		errors => { 
+			dispatch('SET_ERRORS', errors);
+			dispatch('SET_FORM_BUSY',false);
+		}
 	)
 }
 
-export const uploadProfile = ({ dispatch }, dataform, id ) => {
-	api.uploadProfile( dataform, id, profile => { 
-		dispatch('UPDATE_PROFILE', profile);
-	}, resp => { 
-		for (var item in resp.data) {
-		  console.log( resp.data[item][0]);
+export const updateUser = ({ dispatch, state }, dataform, id) => {
+	dispatch('SET_FORM_BUSY',true);
+	api.updateUser( dataform, id, 
+		data => {
+			dispatch('CLEAR_FORM');
+			dispatch('UPDATE_USERS',data.users);
+			if( state.currentUser.id == id)
+			{
+				dispatch('UPDATE_CURRENT_USER',data.user);
+			}
+		},
+		errors => { 
+			dispatch('SET_ERRORS', errors);
+			dispatch('SET_FORM_BUSY',false);
 		}
-	})
+	)
 }
 
-export const logout = ({ dispatch }) => {
-	api.logout( resp => { 
-		dispatch('LOGOUT_USER');
-		location.reload(true);
-	})
+export const createUser = ({ dispatch }, dataform) => {
+	dispatch('SET_FORM_BUSY',true);
+	api.createUser( dataform, 
+		user => { 
+			dispatch('CREATE_USER',user);
+			dispatch('CLEAR_FORM');
+		},
+		errors => { 
+			dispatch('SET_ERRORS',errors);
+			dispatch('SET_FORM_BUSY',false);
+		}
+	)
 }
 
 export const deleteUser = ({ dispatch }, user) => {
 	api.deleteUser( user ,resp => { 
+		dispatch('CLEAR_FORM');
 		dispatch('DELETE_USER',user);
 	})
 }
 
-export const updateUser = ({ dispatch }, dataform, id) => {
-	api.updateUser( dataform, id, data => { 
-		dispatch('UPDATE_USER',data.users);
-		dispatch('UPDATE_CURRENT_USER',data.user);
-		
-	})
+export const updateAvatar = ({ dispatch }, dataform ) => {
+	dispatch('SET_FORM_BUSY',true);
+	api.uploadAvatar( dataform, 
+		data => {
+			dispatch('CLEAR_FORM');
+			dispatch('UPDATE_CURRENT_USER',data.user);
+		},
+		errors => { 
+			dispatch('SET_ERRORS', errors);
+			dispatch('SET_FORM_BUSY',false);
+		}
+	)
 }
 
-export const createUser = ({ dispatch }, dataform) => {
-	api.createUser( dataform, user => { 
-		dispatch('CREATE_USER',user);
-	})
+
+export const cancelForm = ({ dispatch }) => {
+	dispatch('CLEAR_FORM');
+}
+
+export const showForm = ({ dispatch }) => {
+	dispatch('SET_FORM_SHOW',true);
 }

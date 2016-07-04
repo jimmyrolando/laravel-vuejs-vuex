@@ -7,18 +7,20 @@ Vue.config.debug = true
 const state = {
   currentUser: {},
   users: [],
-  logged: false,
-  errors: null
+  form: {
+    show: false,
+    busy: false,
+    success: false,
+    errors: {}
+  }
 }
 
 const mutations = {
   LOGIN_USER (state, currentUser) {
     state.currentUser = currentUser
-    state.logged = true
   },
   LOGOUT_USER (state) {
     state.currentUser = {}
-    state.logged = false
   },
   UPDATE_AVATAR (state, avatar) {
     state.currentUser.avatar = avatar
@@ -26,8 +28,8 @@ const mutations = {
   UPDATE_PROFILE (state, profile) {
     state.currentUser = profile
   },
-  SET_ERRORS (state, value) {
-    state.errors = value
+  SET_ERRORS (state, errors) {
+    state.form.errors = errors
   },
   GET_ALL_USERS (state, users) {
     state.users = users
@@ -35,7 +37,7 @@ const mutations = {
   DELETE_USER (state, user) {
     state.users.$remove(user)
   },
-  UPDATE_USER (state, users) {
+  UPDATE_USERS (state, users) {
     state.users = users
   },
   UPDATE_CURRENT_USER (state, user) {
@@ -44,6 +46,17 @@ const mutations = {
   CREATE_USER (state, user) {
     state.users.push(user)
   },
+  SET_FORM_BUSY (state, value) {
+    state.form.busy = value
+  },
+  SET_FORM_SHOW (state, value) {
+    state.form.show = value
+  },
+  CLEAR_FORM (state, value) {
+    state.form.busy = false
+    state.form.show = false
+    state.form.errors = {}
+  }
 }
 
 

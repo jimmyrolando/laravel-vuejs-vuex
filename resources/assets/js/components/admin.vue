@@ -1,54 +1,57 @@
 <template>
 	<div class="container">
 		<div class="row">
-		 	<div class="col-md-10 col-md-offset-1 clearfix">
-				<button @click="createUser()" class="btn btn-success pull-right" style="margin-bottom:10px;">Nuevo Usuario</button>
+		 	<div class="col-md-8 col-md-offset-2 clearfix">
+				<button @click="createUser()" class="btn btn-success pull-right" style="margin-bottom:10px;">Create New User</button>
 			</div>
 		</div>
-        <div class="row">
-            <div class="col-md-10 col-md-offset-1">
 
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <div class="media" v-for="user in users">
+
                         	<div class="controls">
                         		<i @click="editUser(user)" class="fa fa-2x fa-pencil tm-edit"></i>
                         		<i @click="deleteUser(user)" class="fa fa-2x fa-trash tm-delete"></i>
                         	</div>
-							<div class="media-left media-middle ">
 
+							<div class="media-left media-middle ">
 								<a href="#" @click.prevent="editUser(user)">
 									<img class="media-object avatar-admin" :src="user.avatar" alt="{{ user.name }}">
-									
 								</a>
-								
 							</div>
+
 							<div class="media-body">
-							<p class=""></p>
-								<h5 class="media-heading"><strong >{{ user.name.toUpperCase() }}</strong> <span> ({{ user.role }})</span></h5>
-								<h4>{{ user.full_name }}</h4>
+								<h4 class="media-heading text-capitalize"><strong >{{ user.name }}</strong> <span> ({{ user.role }})</span></h4>
+								<h5>{{ user.full_name }}</h5>
 								<h5>{{ user.birth_date }}</h5>
 								<h5>{{ user.address }}</h5>
 								<h5>{{ user.zip_code }}</h5>
 							</div>
+
 						</div>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 
-    <component :is="currentModal" :model="editedUser" :show.sync="currentModal"></component>
+    <component :is="currentModal" :model="editedUser"></component>
+
 </template>
 <script>
     import CreateUser from './shared/create-user.vue';
-	import UpdateUser from './shared/update-user.vue';
-	import { getAllUsers, deleteUser } from '../vuex/actions';
+    import UpdateUser from './shared/update-user.vue';
+	import DeleteUser from './shared/delete-user.vue';
+
+    import { getAllUsers, showForm } from '../vuex/actions';
+	import { users } from '../vuex/getters';
 
 	export default {
-		components: { 
-            CreateUser, UpdateUser
-        },
+		components: { CreateUser, UpdateUser, DeleteUser },
         data() {
             return {
                 currentModal: '',
@@ -57,11 +60,10 @@
         },
 		vuex: {
 			getters:{
-				users: state => state.users,
+				users
 			},
 			actions: {
-				getAllUsers,
-				deleteUser
+				getAllUsers, showForm
 			}
 		},
 		created() {
@@ -69,15 +71,19 @@
 		},
 		methods: {
 			deleteUser(user) {
-				this.deleteUser(user)
+                this.editedUser = user
+                this.currentModal = 'delete-user'
+                this.showForm(true)
 			},
             editUser(user) {
                 this.editedUser = user
                 this.currentModal = 'update-user'
+                this.showForm(true)
             },
             createUser() {
                 this.editedUser = { }
                 this.currentModal = 'create-user'
+                this.showForm(true)
             }
 		}
 	}

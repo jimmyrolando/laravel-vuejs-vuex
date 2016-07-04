@@ -20,20 +20,22 @@ export default {
 
   	uploadAvatar (formData, cb, ecb = null ) {
 	    Vue.http.post('avatar', formData).then(
-	  		(resp) => cb(resp.data.avatar)
+	  		(resp) => cb(resp.data),
+	  		(resp) => ecb(resp.data)
 	  	);
 	},
 
-	uploadProfile (formData, id, cb, ecb = null ) {
+	updateProfile (formData, id, cb, ecb = null ) {
 	    Vue.http.post('profiles/'+id, formData).then(
 	  		(resp) => cb(resp.data.user),
-	  		(resp) => ecb(resp)
+	  		(resp) => ecb(resp.data)
 	  	);
 	},
 
-	logout (cb) {
-	    Vue.http.get('logout' ).then(
-	  		(resp) => cb(resp.data)
+	updateUser (formData, id, cb, ecb = null ) {
+	    Vue.http.post('users/'+id, formData).then(
+	  		(resp) => cb(resp.data),
+	  		(resp) => ecb(resp.data)
 	  	);
 	},
 
@@ -42,15 +44,11 @@ export default {
 	  		(resp) => cb(resp.data)
 	  	);
 	},
-
-	updateUser (formData, id, cb, ecb = null ) {
-	    Vue.http.post('users/'+id, formData).then(
-	  		(resp) => cb(resp.data)
-	  	);
-	},
+	
 	createUser (formData, cb, ecb = null ) {
 	    Vue.http.post('users', formData).then(
-	  		(resp) => cb(resp.data.user)
+	  		(resp) => cb(resp.data.user),
+	  		(resp) => ecb(resp.data)
 	  	);
 	},
 }

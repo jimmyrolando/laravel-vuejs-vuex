@@ -1,67 +1,58 @@
 <template>
-	<modal :show.sync="showModal">
-		<h2 slot="header" v-show="!image">Seleccione una imagen para el Perfil</h2>
+	<modal v-if="form.show">
+		<template slot="header">
+			<h2 class="text-center">Select a Profile's Image</h2>
+		</template>
+
 		<template slot="body" >
-    		<form id="avatarForm" enctype="multipart/form-data" action="/profiles" method="POST">
-            	<input type="file" name="avatar">
-            	
+    		<form id="avatarForm" enctype="multipart/form-data" method="POST">
+            	<div class="form-group" :class="{'has-error': form.errors.avatar }">
+			    	<input type="file" id="avatar" name="avatar">
+			    	<span class="help-block" v-if="form.errors.avatar">
+		            	{{ form.errors.avatar }}
+			    	</span>
+				</div>
         	</form>
 		</template>
-		<button slot="footer" type="submit" @click.prevent="sendAvatar" class="pull-right btn btn-primary">Actualizar Avatar</button>
+
+		<template slot="footer">
+			<button class="btn btn-default" @click="cancelForm">Cancel</button>
+			<button :disabled="form.busy" @click="sendForm" class=" btn btn-info">
+            	Update User <i v-if="form.busy" class="fa fa-spinner fa-pulse fa-fw"></i>
+            </button>
+		</template>
 	</modal>
 </template>
 <script>
 	import modal from './modal.vue';
-	import { uploadAvatar } from '../../vuex/actions';
+	import { updateAvatar, cancelForm } from '../../vuex/actions';
+	import { form } from '../../vuex/getters';
 
     export default {
+    	components: { modal },
     	data() { 
     		return {
     			image: '',
     		}
     	},
-    	computed: {
-    		showModal: {
-    			get () {
-			      return this.show != ''
-			    },
-			    set (val) {
-			      this.show = ''
-			    }
-            }
-    	},
     	vuex: {
-            actions: {
-                uploadAvatar
-            }
+    		getters: { form },
+            actions: { updateAvatar, cancelForm }
         },
-    	components: {
-    		modal
-    	},
     	props: {
-			show: {
-			  type: String,
-			  required: true,
-			  twoWay: true   
+			model: {
+				type: Object,
+				required: true
 			}
 		},
 		methods: {
-			sendAvatar() {
+			sendForm() {
 				let formData = new FormData(document.getElementById('avatarForm'));
-				this.uploadAvatar(formData)
-				this.showModal = false
-				this.show = ''
-				this.image = ''
+				this.updateAvatar(formData)
 			}
 		}
     }
 </script>
 <style>
-	@media( min-width: 768px) { 
-		.modal-container {
-	  		width: 35%;
-	  		min-width: 430px;
-	  		min-height: 200px
-		}
-	}
+
 </style>

@@ -50,8 +50,11 @@ class UserController extends Controller
             'name' => $request->input('name'),
             'email' => $request->input('email'),
             'password' => bcrypt($request->input('password')),
-            'role' => $request->input('role'),
+            'role' => $request->input('role')
         ]);
+        
+        $user->avatar = 'profile.jpg';
+        $user->save();
         
         return response()->json(compact('user'));
     }
@@ -77,15 +80,11 @@ class UserController extends Controller
         ]);
 
         $user = User::findOrFail($id);
-
+        $user->fill($request->except(['avatar']));
         if($request->hasFile('avatar'))
         {
-            $avatar = $this->saveFile($request->file('avatar'));
-            $user->avatar = $avatar;
+            $user->avatar = $this->saveFile($request->file('avatar'));
         }
-
-        $user->fill($request->all());
-        
         $user->save();
 
         $users = User::all();

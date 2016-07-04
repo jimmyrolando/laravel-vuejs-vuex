@@ -1,40 +1,60 @@
 <template>
-	<modal :show.sync="showModal">
-		<h2 slot="header" >Crear Nuevo Usuario</h2>
-		<template slot="body" >
-    		<form id="userCreateForm" role="form" method="POST">
-
-    					<div class="form-group">
-                            <label for="name">Role</label>
-                            <select name="role" id="role" class="form-control" v-model="user.role">
-					    		<option value="admin">Administrador</option>
-					    		<option value="user">Usuario</option>
-					    	</select>
-                        </div>
-                        <div class="form-group">
-                            <label for="name">Nombre de Usuario</label>
-                            <input id="name" type="text" class="form-control" name="name" value="">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="email">Correo Electrónico</label>
-                            <input id="email" type="email" class="form-control" name="email" value="">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="password">Contraseña</label>
-                            <input id="password" type="text" class="form-control" name="password">
-                        </div>
-                    </form>
+	<modal v-if="form.show">
+		<template slot="header">
+			<h2 >Create New User</h2>
 		</template>
-		<button slot="footer" type="submit" @click.prevent="sendUser" class="pull-right btn btn-primary">Crear Usuario</button>
+
+		<template slot="body" >
+    		<form id="createForm" role="form" method="POST">
+				<div class="form-group" >
+                    <label for="name">Role</label>
+                    <select name="role" id="role" class="form-control" v-model="user.role">
+			    		<option value="admin">Admin</option>
+			    		<option value="user">User</option>
+			    	</select>
+                </div>
+
+                <div class="form-group" :class="{'has-error': form.errors.name }">
+                    <label for="name">User Name</label>
+                    <input id="name" type="text" class="form-control" name="name" value="">
+                    <span class="help-block" v-if="form.errors.name">
+			            {{ form.errors.name }}
+				    </span>
+                </div>
+
+                <div class="form-group" :class="{'has-error': form.errors.email }">
+                    <label for="email">Email</label>
+                    <input id="email" type="email" class="form-control" name="email" value="">
+                    <span class="help-block" v-if="form.errors.email">
+				            {{ form.errors.email }}
+				    </span>
+                </div>
+
+                <div class="form-group" :class="{'has-error': form.errors.password }">
+                    <label for="password">Password</label>
+                    <input id="password" type="text" class="form-control" name="password">
+                    <span class="help-block" v-if="form.errors.password">
+				        {{ form.errors.password }}
+				    </span>
+                </div> 
+            </form>
+		</template>
+
+		<template slot="footer">
+			<button class=" btn btn-default" @click="cancelForm">Cancel</button>
+            <button :disabled="form.busy" @click="sendForm" class=" btn btn-info">
+            	Create User <i v-if="form.busy" class="fa fa-spinner fa-pulse fa-fw"></i>
+            </button>
+		</template>
 	</modal>
 </template>
 <script>
 	import modal from './modal.vue';
-	import { createUser } from '../../vuex/actions';
+	import { createUser, cancelForm } from '../../vuex/actions';
+	import { form } from '../../vuex/getters';
 
     export default {
+    	components: { modal },
     	data() { 
     		return {
     			user: {
@@ -45,56 +65,24 @@
     			}
     		}
     	},
-    	computed: {
-    		showModal: {
-    			get () {
-			      return this.show != ''
-			    },
-			    set (val) {
-			      this.show = ''
-			    }
-            }
-    	},
     	vuex: {
-            actions: {
-                createUser
-            }
+    		getters: { form },
+            actions: { createUser, cancelForm }
         },
-    	components: {
-    		modal
-    	},
     	props: {
-			show: {
-			  type: String,
-			  required: true,
-			  twoWay: true   
-			},
 			model: {
 				type: Object,
 				required: true
 			}
 		},
 		methods: {
-			sendUser() {
-				let formData = new FormData(document.getElementById('userCreateForm'));
+			sendForm() {
+				let formData = new FormData(document.getElementById('createForm'));
 				this.createUser(formData)
-				if( ! this.errors )
-				{
-					this.showModal = false
-					this.show = ''
-					return
-				}
-				// console.log(this.errors)
 			}
 		}
     }
 </script>
 <style>
-	@media( min-width: 768px) { 
-		.modal-container {
-	  		width: 35%;
-	  		min-width: 430px;
-	  		min-height: 200px
-		}
-	}
+
 </style>

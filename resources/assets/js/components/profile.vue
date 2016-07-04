@@ -2,8 +2,8 @@
     <div class="container">
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
-                <img :src="currentUser.avatar" class="avatar" @click="currentModal = 'update-avatar'">    
-                <h2>{{ currentUser.name }} <small>(role:{{ currentUser.role }})</small> <i class="fa fa fa-pencil edit" @click="currentModal = 'update-profile'"></i></h2>
+                <img v-show="currentUser.avatar" :src="currentUser.avatar" class="avatar" @click="editAvatar()">    
+                <h2 class="text-capitalize">{{ currentUser.name +"\'s" }} Profile  <i class="fa fa fa-pencil edit" @click="editUser()"></i></h2>
                 <h4>{{ currentUser.full_name }}</h4>
                 <h4>{{ currentUser.birth_date }}</h4>
                 <h4>{{ currentUser.address }}</h4>
@@ -12,16 +12,19 @@
         </div><br>
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
-                <div id="map"></div>
+                <div v-show="map" id="map"></div>
             </div>
         </div>
-        <component :is="currentModal" :show.sync="currentModal"></component>
+        <component :is="currentModal" :model="editedUser"></component>
     </div>
 </template>
 <script>
     import UpdateAvatar from './shared/update-avatar.vue';
     import UpdateProfile from './shared/update-profile.vue';
     import CreateProfile from './shared/update-profile.vue';
+
+    import { getAllUsers, showForm } from '../vuex/actions';
+    import { currentUser } from '../vuex/getters';
 
     export default {
         components: { 
@@ -30,23 +33,34 @@
         data() {
             return {
                 currentModal: '',
+                editedUser: null,
                 map: null,
                 geocoder: null,
                 marker: null
             }
         },
         vuex: {
-            getters: {
-                currentUser: state => state.currentUser
-            }
+            getters: { currentUser },
+            actions: { getAllUsers, showForm }
         },
         ready() {
             if( ! this.currentUser.full_name == '' )
             {
                 this.currentModal = 'create-profile'
+                this.showForm(true)
             }
         },
         methods: {
+            editUser() {
+                this.editedUser = this.currentUser
+                this.currentModal = 'update-profile'
+                this.showForm(true)
+            },
+            editAvatar() {
+                this.editedUser = this.currentUser
+                this.currentModal = 'update-avatar'
+                this.showForm(true)
+            },
             geocodeAddress() {
                 let geocoder = this.geocoder;
                 let map = this.map;
@@ -107,5 +121,4 @@
     .edit:hover {
         color: gray;
     }
-
 </style>
